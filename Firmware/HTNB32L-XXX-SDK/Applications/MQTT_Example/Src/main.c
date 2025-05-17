@@ -16,6 +16,8 @@
 #include "main.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
+
 
 
 static uint32_t uart_cntrl = (ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | 
@@ -23,19 +25,40 @@ static uint32_t uart_cntrl = (ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_
 
 extern USART_HandleTypeDef huart1;
 
-volatile bool button_state = false;
+//volatile bool button_state = false;
+
+#define QUEUE_LENGTH 10
+#define ITEM_SIZE sizeof(bool)
+
+QueueHandle_t xFila;
+
+
 
 void Task1(void *pvParameters) {
+    bool button_state = false;
+    bool state_past = false;
+
     while (1) {
       button_state = (bool) HT_GPIO_PinRead(BUTTON_INSTANCE, BUTTON_PIN);
-      vTaskDelay(pdMS_TO_TICKS(50));        // Delay de 500ms
+      if(button_state != state_past) {
+        printf("Enviando dado ...\n");
+        xQueueSend(xFila, &button_state, portMAX_DELAY);
+        state_past = button_state;
+      }
+      vTaskDelay(pdMS_TO_TICKS(100));      
     }
 }
 
 void Task2(void *pvParameters) {
+    bool button_state = false;
+    bool state = false;
     while (1) {
-        HT_GPIO_WritePin(LED_GPIO_PIN, LED_INSTANCE, button_state);
-        vTaskDelay(pdMS_TO_TICKS(50));
+        if(xQueueReceive(xFila, &button_state, portMAX_DELAY)) printf("Recebido \n");
+        if(button_state){
+          state = !state;
+          HT_GPIO_WritePin(LED_GPIO_PIN, LED_INSTANCE, state);
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -45,6 +68,7 @@ void Task2(void *pvParameters) {
   \return
 */
 void main_entry(void) {
+
     HAL_USART_InitPrint(&huart1, GPR_UART1ClkSel_26M, uart_cntrl, 115200);
     
     HT_GPIO_InitButton();
@@ -52,17 +76,24 @@ void main_entry(void) {
 
     slpManNormalIOVoltSet(IOVOLT_3_30V);
 
-    printf("Exemplo FreeRTOS\n");
+    xFila = xQueueCreate(QUEUE_LENGTH, sizeof(int));
 
-    xTaskCreate(Task1, "Blink", 128, NULL, 1, NULL);
-    xTaskCreate(Task2, "Print", 128, NULL, 1, NULL);
+    if(xFila == NULL){
+      printf("Error ao criar Fila\n");
+    } else {
+      printf("Exemplo FreeRTOS\n");
 
-    vTaskStartScheduler();
+      xTaskCreate(Task1, "Blink", 128, NULL, 1, NULL);
+      xTaskCreate(Task2, "Print", 128, NULL, 1, NULL);
+
+      vTaskStartScheduler();
     
-    printf("Nao deve chegar aqui.\n");
+      printf("Nao deve chegar aqui.\n");
 
-    while(1);
+      while(1);
 
+    }
+   
 }
 
 /******** HT Micron Semicondutores S.A **END OF FILE*/
