@@ -119,6 +119,10 @@ void HT_App(void) {
     char case_num;
     
     while(1) {
+        slpManWakeSrc_e wkpsrc = slpManGetWakeupSrc();
+
+        printf("Fonte de Wake %d\n\n", wkpsrc);
+
         printf("Case 0: Sleep1 Test\r\n");
         printf("Case 1: Sleep2 Test\r\n");
         printf("Case 2: Hibernate1 Test\r\n");
