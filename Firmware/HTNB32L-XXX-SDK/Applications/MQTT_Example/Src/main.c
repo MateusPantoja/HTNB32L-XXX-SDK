@@ -16,7 +16,9 @@
 #include "main.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
+//#include "queue.h"
+#include "semphr.h"
+#include <stdbool.h>
 
 
 
@@ -27,11 +29,8 @@ extern USART_HandleTypeDef huart1;
 
 //volatile bool button_state = false;
 
-#define QUEUE_LENGTH 10
-#define ITEM_SIZE sizeof(bool)
 
-QueueHandle_t xFila;
-
+SemaphoreHandle_t xSemaforo;
 
 
 void Task1(void *pvParameters) {
@@ -40,25 +39,27 @@ void Task1(void *pvParameters) {
 
     while (1) {
       button_state = (bool) HT_GPIO_PinRead(BUTTON_INSTANCE, BUTTON_PIN);
-      if(button_state != state_past) {
-        printf("Enviando dado ...\n");
-        xQueueSend(xFila, &button_state, portMAX_DELAY);
-        state_past = button_state;
+      if (button_state != state_past) {
+            if (button_state) {
+                printf("Botão pressionado. Liberando semáforo...\n");
+                xSemaphoreGive(xSemaforo);
+            }
+            state_past = button_state;
       }
       vTaskDelay(pdMS_TO_TICKS(100));      
     }
 }
 
 void Task2(void *pvParameters) {
-    bool button_state = false;
     bool state = false;
+
     while (1) {
-        if(xQueueReceive(xFila, &button_state, portMAX_DELAY)) printf("Recebido \n");
-        if(button_state){
-          state = !state;
-          HT_GPIO_WritePin(LED_GPIO_PIN, LED_INSTANCE, state);
+        if (xSemaphoreTake(xSemaforo, portMAX_DELAY) == pdTRUE) {
+            // Alterna o estado do LED
+            state = !state;
+            HT_GPIO_WritePin(LED_GPIO_PIN, LED_INSTANCE, state);
+            printf("LED alternado para: %s\n", !state ? "ON" : "OFF");
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -76,23 +77,25 @@ void main_entry(void) {
 
     slpManNormalIOVoltSet(IOVOLT_3_30V);
 
-    xFila = xQueueCreate(QUEUE_LENGTH, sizeof(int));
+    xSemaforo = xSemaphoreCreateBinary();
 
-    if(xFila == NULL){
-      printf("Error ao criar Fila\n");
-    } else {
-      printf("Exemplo FreeRTOS\n");
-
-      xTaskCreate(Task1, "Blink", 128, NULL, 1, NULL);
-      xTaskCreate(Task2, "Print", 128, NULL, 1, NULL);
-
-      vTaskStartScheduler();
-    
-      printf("Nao deve chegar aqui.\n");
-
-      while(1);
-
+    if (xSemaforo == NULL) {
+        printf("Erro ao criar semáforo\n");
+        while (1);
     }
+  
+    printf("Exemplo FreeRTOS\n");
+
+    xTaskCreate(Task1, "Blink", 128, NULL, 1, NULL);
+    xTaskCreate(Task2, "Print", 128, NULL, 1, NULL);
+
+    vTaskStartScheduler();
+  
+    printf("Nao deve chegar aqui.\n");
+
+    while(1);
+
+    
    
 }
 
