@@ -38,8 +38,9 @@
 #define __MAIN_H__
 
 #include "htnb32lxxx_hal_usart.h"
-#include "HT_Fsm.h"
-#include "HT_GPIO_Api.h"
+//#include "HT_Fsm.h"
+//#include "HT_GPIO_Api.h"
+#include "HT_GPIO_Demo.h"
 
 #include "bsp.h"
 #include "HT_BSP_Custom.h"
