@@ -235,6 +235,8 @@ static void HT_UserAppTask(void *arg) {
     slpstate = slpManGetLastSlpState();
     wkpSrc = slpManGetWakeupSrc();
 
+    printf("Wakeup Src: %d\n", wkpSrc);
+
     if((slpstate == SLP_SLP2_STATE) || (slpstate == SLP_HIB_STATE)) {    // wakeup from sleep 
 		HT_FsRead();
 
