@@ -42,6 +42,7 @@
 //#include "HT_GPIO_Api.h"
 #include "HT_GPIO_Demo.h"
 
+
 #include "bsp.h"
 #include "HT_BSP_Custom.h"
 #include "osasys.h"
@@ -68,6 +69,7 @@
 #include "FreeRTOS.h"
 #include "netmgr.h"
 #include <stdio.h>
+#include "Driver_USART.h"
 
 /* Defines  ------------------------------------------------------------------*/
 

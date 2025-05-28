@@ -79,14 +79,24 @@ ________________________________________________________________________________
 #define BUTTON_PAD_ID            25                 /**</ Button Pad ID. */
 #define BUTTON_PAD_ALT_FUNC      PAD_MuxAlt0        /**</ Button pin alternate function. */
 
-//GPIO3 - LED
-#define LED_INSTANCE             0                  /**</ LED pin instance. */
-#define LED_GPIO_PIN             3                  /**</ LED pin number. */
-#define LED_PAD_ID               14                 /**</ LED Pad ID. */
-#define LED_PAD_ALT_FUNC         PAD_MuxAlt0        /**</ LED pin alternate function. */
+//GPIO3 - LED1
+#define LED1_INSTANCE             0                  /**</ LED pin instance. */
+#define LED1_GPIO_PIN             3                  /**</ LED pin number. */
+#define LED1_PAD_ID               14                 /**</ LED Pad ID. */
+#define LED1_PAD_ALT_FUNC         PAD_MuxAlt0        /**</ LED pin alternate function. */
 
-#define LED_ON  1                                   /**</ LED on. */
-#define LED_OFF 0                                   /**</ LED off. */
+//GPIO4 - LED2
+#define LED2_INSTANCE             0                  /**</ LED pin instance. */
+#define LED2_GPIO_PIN             4                  /**</ LED pin number. */
+#define LED2_PAD_ID               15                 /**</ LED Pad ID. */
+#define LED2_PAD_ALT_FUNC         PAD_MuxAlt0        /**</ LED pin alternate function. */
+
+//GPIO5 - LED3
+#define LED3_INSTANCE             0                  /**</ LED pin instance. */
+#define LED3_GPIO_PIN             5                  /**</ LED pin number. */
+#define LED3_PAD_ID               16                 /**</ LED Pad ID. */
+#define LED3_PAD_ALT_FUNC         PAD_MuxAlt0        /**</ LED pin alternate function. */
+
 
 /* Functions  ------------------------------------------------------------------*/
 
@@ -122,7 +132,9 @@ void HT_GPIO_InitButton(void);
  *
  * \retval none.
  *******************************************************************/
-void HT_GPIO_InitLed(void);
+void HT_GPIO_InitLed1(void);
+void HT_GPIO_InitLed2(void);
+void HT_GPIO_InitLed3(void);
 
 #endif /*__HT_GPIO_API_H__*/
 

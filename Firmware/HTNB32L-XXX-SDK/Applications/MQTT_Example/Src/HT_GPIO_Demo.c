@@ -17,39 +17,11 @@
 
 volatile uint8_t gpio_exti = 1;
 
-/*!******************************************************************
- * \fn static void HT_GPIO_Callback(void)
- * \brief GPIO callback. Function that will be called after aa GPIO IRQn
- * be detected by the device.
- *
- * \param[in]  none
- * \param[out] none
- *
- * \retval none.
- *******************************************************************/
 void HT_GPIO_Callback(void);
-
-/*!******************************************************************
- * \fn static void HT_GPIO_InitButton(void)
- * \brief Initialize GPIO button.
- *
- * \param[in]  none
- * \param[out] none
- *
- * \retval none.
- *******************************************************************/
 void HT_GPIO_InitButton(void);
-
-/*!******************************************************************
- * \fn static void HT_GPIO_InitLed(void)
- * \brief Initialize GPIO LED.
- *
- * \param[in]  none
- * \param[out] none
- *
- * \retval none.
- *******************************************************************/
-void HT_GPIO_InitLed(void);
+void HT_GPIO_InitLed3(void);
+void HT_GPIO_InitLed2(void);
+void HT_GPIO_InitLed1(void);
 
 void HT_GPIO_Callback(void) {
   //Save current irq mask and diable whole port interrupts to get rid of interrupt overflow
@@ -83,16 +55,46 @@ void HT_GPIO_InitButton(void) {
   //HT_XIC_EnableIRQ(PXIC_Gpio_IRQn);
 }
 
-void HT_GPIO_InitLed(void) {
+void HT_GPIO_InitLed3(void) {
   GPIO_InitType GPIO_InitStruct = {0};
 
   GPIO_InitStruct.af = PAD_MuxAlt0;
-  GPIO_InitStruct.pad_id = LED_PAD_ID;
-  GPIO_InitStruct.gpio_pin = LED_GPIO_PIN;
+  GPIO_InitStruct.pad_id = LED3_PAD_ID;
+  GPIO_InitStruct.gpio_pin = LED3_GPIO_PIN;
   GPIO_InitStruct.pin_direction = GPIO_DirectionOutput;
   GPIO_InitStruct.init_output = 0;
   GPIO_InitStruct.pull = PAD_AutoPull;
-  GPIO_InitStruct.instance = LED_INSTANCE;
+  GPIO_InitStruct.instance = LED3_INSTANCE;
+  GPIO_InitStruct.exti = GPIO_EXTI_DISABLED;
+
+  HT_GPIO_Init(&GPIO_InitStruct);
+}
+
+void HT_GPIO_InitLed2(void) {
+  GPIO_InitType GPIO_InitStruct = {0};
+
+  GPIO_InitStruct.af = PAD_MuxAlt0;
+  GPIO_InitStruct.pad_id = LED2_PAD_ID;
+  GPIO_InitStruct.gpio_pin = LED2_GPIO_PIN;
+  GPIO_InitStruct.pin_direction = GPIO_DirectionOutput;
+  GPIO_InitStruct.init_output = 0;
+  GPIO_InitStruct.pull = PAD_AutoPull;
+  GPIO_InitStruct.instance = LED2_INSTANCE;
+  GPIO_InitStruct.exti = GPIO_EXTI_DISABLED;
+
+  HT_GPIO_Init(&GPIO_InitStruct);
+}
+
+void HT_GPIO_InitLed1(void) {
+  GPIO_InitType GPIO_InitStruct = {0};
+
+  GPIO_InitStruct.af = PAD_MuxAlt0;
+  GPIO_InitStruct.pad_id = LED1_PAD_ID;
+  GPIO_InitStruct.gpio_pin = LED1_GPIO_PIN;
+  GPIO_InitStruct.pin_direction = GPIO_DirectionOutput;
+  GPIO_InitStruct.init_output = 0;
+  GPIO_InitStruct.pull = PAD_AutoPull;
+  GPIO_InitStruct.instance = LED1_INSTANCE;
   GPIO_InitStruct.exti = GPIO_EXTI_DISABLED;
 
   HT_GPIO_Init(&GPIO_InitStruct);
