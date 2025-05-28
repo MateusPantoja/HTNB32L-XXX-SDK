@@ -15,7 +15,7 @@
 
 #include "HT_GPIO_Demo.h"
 
-static volatile uint8_t gpio_exti = 0;
+static volatile uint8_t gpio_exti = 1;
 
 /*!******************************************************************
  * \fn static void HT_GPIO_Callback(void)
@@ -73,14 +73,14 @@ static void HT_GPIO_InitButton(void) {
   GPIO_InitStruct.pin_direction = GPIO_DirectionInput;
   GPIO_InitStruct.pull = PAD_InternalPullUp;
   GPIO_InitStruct.instance = BUTTON_INSTANCE;
-  GPIO_InitStruct.exti = GPIO_EXTI_ENABLE;
-  GPIO_InitStruct.interrupt_config = GPIO_InterruptFallingEdge;
+  GPIO_InitStruct.exti = GPIO_EXTI_DISABLED;
+ // GPIO_InitStruct.interrupt_config = GPIO_InterruptFallingEdge;
 
   HT_GPIO_Init(&GPIO_InitStruct);
 
   // Enable IRQ
-  HT_XIC_SetVector(PXIC_Gpio_IRQn, HT_GPIO_Callback);
-  HT_XIC_EnableIRQ(PXIC_Gpio_IRQn);
+  //HT_XIC_SetVector(PXIC_Gpio_IRQn, HT_GPIO_Callback);
+  //HT_XIC_EnableIRQ(PXIC_Gpio_IRQn);
 }
 
 static void HT_GPIO_InitLed(void) {
@@ -107,13 +107,22 @@ void HT_GPIO_App(void) {
 
   slpManNormalIOVoltSet(IOVOLT_3_30V);
 
+  volatile uint32_t value = 0;
+
   while(1) {
 
-      if (gpio_exti)
+    value = HT_GPIO_PinRead(BUTTON_INSTANCE, BUTTON_PIN);
+
+    ht_printf("Lendo valor Button ");
+    ht_printf("valor - %d \n", value);
+
+    if (!value)
         HT_GPIO_WritePin(LED_GPIO_PIN, LED_INSTANCE, LED_ON);
-      else
+    else
         HT_GPIO_WritePin(LED_GPIO_PIN, LED_INSTANCE, LED_OFF);
-      
+    
+    delay_us(10000000);
+  
   }
 }
 
