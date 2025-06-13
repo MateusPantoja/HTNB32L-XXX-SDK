@@ -184,10 +184,10 @@ static const char addr[] = {"test.mosquitto.org"};
 static char topic[25] = {0};
 
 // Blue button topic where the digital twin will transmit its messages.
-char topic_bluebutton_sw[] = {"htnb32l_bluebutton_sw"};
+char topic_bluebutton_sw[] = {"pantoja_bluebutton_sw"}; //pantoja_bluebutton_sw
 
 // White button topic where the digital twin will transmit its messages.
-char topic_whitebutton_sw[] = {"htnb32l_whitebutton_sw"};
+char topic_whitebutton_sw[] = {"pantoja_whitebutton_sw"};
 
 static const char blue_button_str[] = {"Blue"};
 static const char white_button_str[] = {"White"};
@@ -251,12 +251,12 @@ static void HT_FSM_UpdateUserLedState(void) {
 
     HT_FSM_MQTTWritePayload((uint8_t *)payload, strlen(payload));
     memset(topic, 0, sizeof(topic));
-    sprintf(topic, "htnb32l_get_state");
+    sprintf(topic, "pantoja_get_state");
 
     HT_MQTT_Publish(&mqttClient, (char *)topic, mqtt_payload, strlen((char *)mqtt_payload), QOS0, 0, 0, 0);
 
     memset(topic, 0, sizeof(topic));
-    sprintf(topic, "htnb32l_set_state");
+    sprintf(topic, "pantoja_set_state");
     
     HT_MQTT_Subscribe(&mqttClient, topic, QOS0);
     HT_MQTT_Subscribe(&mqttClient, topic_bluebutton_sw, QOS0);
@@ -372,7 +372,7 @@ static void HT_FSM_PushButtonHandleState(void) {
         HT_FSM_MQTTWritePayload((uint8_t *)blue_button_str, strlen(blue_button_str));
 
         memset(topic, 0, sizeof(topic));
-        sprintf(topic, "htnb32l_bluebutton_fw");
+        sprintf(topic, "pantoja_bluebutton_fw");
 
         // Change to publish state
         state = HT_MQTT_PUBLISH_STATE;
@@ -386,7 +386,7 @@ static void HT_FSM_PushButtonHandleState(void) {
         HT_FSM_MQTTWritePayload((uint8_t *)white_button_str, strlen(white_button_str));
 
         memset(topic, 0, sizeof(topic));
-        sprintf(topic, "htnb32l_whitebutton_fw");
+        sprintf(topic, "pantoja_whitebutton_fw");
         
         // Change to publish state
         state = HT_MQTT_PUBLISH_STATE;

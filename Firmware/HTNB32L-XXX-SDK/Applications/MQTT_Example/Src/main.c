@@ -51,8 +51,8 @@ static void HT_SetConnectioParameters(void) {
     }
 
     apnSetting.cid = 0;
-    apnSetting.apnLength = strlen("nbiot.gsim");
-    strcpy((char *)apnSetting.apnStr, "nbiot.gsim");
+    apnSetting.apnLength = strlen("iot.datatem.com.br");
+    strcpy((char *)apnSetting.apnStr, "iot.datatem.com.br");
     apnSetting.pdnType = CMI_PS_PDN_TYPE_IP_V4V6;
     ret = appSetAPNSettingSync(&apnSetting, &cid);
 }
