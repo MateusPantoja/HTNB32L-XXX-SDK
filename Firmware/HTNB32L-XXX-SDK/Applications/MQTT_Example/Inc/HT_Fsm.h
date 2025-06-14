@@ -46,6 +46,7 @@
 #include "cmsis_os2.h"
 #include "MQTTClient.h"
 #include "HT_LED_Task.h"
+#include "HT_LDR_Task.h"
 
 /* Defines  ------------------------------------------------------------------*/
 #define HT_MQTT_KEEP_ALIVE_INTERVAL 240                   /**</ Keep alive interval in ms. */
@@ -108,6 +109,8 @@ typedef enum {
  * \retval none
  *******************************************************************/
 void HT_FSM_SetSubscribeBuff(uint8_t *buff, uint8_t payload_len);
+void led_state_manager(uint8_t *payload, uint8_t payload_len, 
+    uint8_t *topic, uint8_t topic_len);
 
 /*!******************************************************************
  * \fn void HT_Fsm(void)

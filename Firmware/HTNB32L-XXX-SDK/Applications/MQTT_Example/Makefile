@@ -29,7 +29,8 @@ obj-y             += Src/main.o \
                      Src/HT_BSP_Custom.o \
                      Src/HT_GPIO_Api.o \
                      Src/HT_LED_Task.o \
+                     Src/HT_LDR_Task.o \
                      Src/HT_MQTT_Api.o \
-                     Src/HT_Fsm.o
+                     Src/HT_Fsm.o 
 
 include $(TOP)/SDK/PLAT/tools/scripts/Makefile.rules

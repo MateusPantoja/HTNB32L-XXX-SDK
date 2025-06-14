@@ -119,12 +119,15 @@ void HT_MQTT_Publish(MQTTClient *mqtt_client, char *topic, uint8_t *payload, uin
 }
 
 void HT_MQTT_SubscribeCallback(MessageData *msg) {
-    printf("Subscribe received: %s\n", msg->message->payload);
+    printf("Subscribe received: %s from topic:[%s]\n", msg->message->payload, msg->topicName->lenstring.data);
 
-    subscribe_callback = 1;
-    HT_FSM_SetSubscribeBuff((uint8_t *)msg->message->payload, (uint8_t)msg->message->payloadlen);
-
-    memset(msg->message->payload, 0, msg->message->payloadlen);
+    //subscribe_callback = 1;
+    //HT_FSM_SetSubscribeBuff((uint8_t *)msg->message->payload, (uint8_t)msg->message->payloadlen);
+    led_state_manager((uint8_t *)msg->message->payload, (uint8_t)msg->message->payloadlen, 
+        (uint8_t *)msg->topicName->lenstring.data, (uint8_t)msg->topicName->lenstring.len);
+    
+        memset(msg->message->payload, 0, msg->message->payloadlen);
+        memset(msg->topicName->lenstring.data, 0, msg->topicName->lenstring.len);
 }
 
 void HT_MQTT_Subscribe(MQTTClient *mqtt_client, char *topic, enum QoS qos) {
