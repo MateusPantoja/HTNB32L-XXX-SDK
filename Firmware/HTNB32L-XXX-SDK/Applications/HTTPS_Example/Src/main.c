@@ -16,10 +16,10 @@
 #include "main.h"
 
 /* HTTP HOST */
-#define TEST_HOST "https://api.openweathermap.org/"
+#define TEST_HOST "http://api.openweathermap.org/"
 
 /* HTTP path for the data that will be queried. */
-#define TEST_SERVER_NAME "https://api.openweathermap.org/data/2.5/weather?q=porto+alegre&appid=3e53f1d247b84848790b704eaad25980&mode=xml&units=metric"
+#define TEST_SERVER_NAME "http://api.openweathermap.org/data/2.5/weather?q=porto+alegre&appid=3e53f1d247b84848790b704eaad25980&mode=xml&units=metric"
 
 static volatile uint8_t simReady = 0;
 
@@ -50,8 +50,8 @@ static void HT_SetConnectioParameters(void) {
     }
 
     apnSetting.cid = 0;
-    apnSetting.apnLength = strlen("nbiot.gsim");
-    strcpy((char *)apnSetting.apnStr, "nbiot.gsim");
+    apnSetting.apnLength = strlen("iot.datatem.com.br");
+    strcpy((char *)apnSetting.apnStr, "iot.datatem.com.br");
     apnSetting.pdnType = CMI_PS_PDN_TYPE_IP_V4V6;
     appSetAPNSettingSync(&apnSetting, &cid);
 }
