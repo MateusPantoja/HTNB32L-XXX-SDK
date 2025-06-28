@@ -55,7 +55,7 @@
 
 #define LDR_TASK_STACK_SIZE    (1024*4)                     /**</ Bytes that will be allocated for this task. */
 #define DEMO_ADC_CHANNEL ADC_ChannelAio2        /**</ ADC channel. */
-#define READING_TIME_SECONDS 60
+#define READING_TIME_SECONDS 10
 
 //#define GREEN_LED_DELAY 1000                                /**</ Led blinking delay. */
 

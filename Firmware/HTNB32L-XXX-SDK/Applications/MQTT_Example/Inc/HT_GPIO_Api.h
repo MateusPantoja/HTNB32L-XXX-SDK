@@ -42,6 +42,8 @@
 #include "pad_qcx212.h"
 #include "gpio_qcx212.h"
 #include "HT_Fsm.h"
+#include "cmsis_os2.h"
+
 
 /* Defines  ------------------------------------------------------------------*/
 
@@ -117,6 +119,7 @@ typedef enum {
     HT_GREEN_LED
 } HT_Led_Type;
 
+extern osMessageQueueId_t btnQueue;
 /* Functions ------------------------------------------------------------------*/
 
 /*!******************************************************************

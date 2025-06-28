@@ -101,6 +101,8 @@ static char topic[25] = {0};
 char topic_blueled_sw[] = {"hana/pantoja/pantoja_blueled_sw"}; //pantoja_bluebutton_sw
 char topic_whiteled_sw[] = {"hana/pantoja/pantoja_whiteled_sw"}; //
 
+extern uint16_t blue_irqn_mask;
+extern uint16_t white_irqn_mask;
 
 //FSM state.
 volatile HT_FSM_States state = HT_WAIT_FOR_BUTTON_STATE;
@@ -114,8 +116,8 @@ volatile uint8_t subscribe_callback = 0;
 //Buffer where the digital twin messages will be stored.
 static uint8_t subscribe_buffer[HT_SUBSCRIBE_BUFF_SIZE] = {0};
 
-static StaticTask_t yield_thread, public_thread;
-static uint8_t yieldTaskStack[1024*4], publicTaskStack[1024*4];
+static StaticTask_t yield_thread, public_thread, btn_thread;
+static uint8_t yieldTaskStack[1024*4], publicTaskStack[1024*4], btntaskStack[1024*4];
 
 static void HT_YieldThread(void *arg) {
     while (1) {
@@ -127,23 +129,112 @@ static void HT_YieldThread(void *arg) {
 static void taskPubLdr(void *arg) {
     uint32_t recv = 0;
     char payload[12];
+    int ret = 0;
 
     while (1)
     {
+        printf("MQtt is connected %d\n", mqttClient.isconnected);
 
         if (osMessageQueueGet(ldrQueue, &recv, NULL, osWaitForever) == osOK) {
+            memset(payload, 0, sizeof(payload));
             snprintf(payload, sizeof(payload), "%lu", recv);
             HT_FSM_MQTTWritePayload((uint8_t *)payload, strlen(payload));
             memset(topic, 0, sizeof(topic));
             sprintf(topic, "hana/pantoja/ldr_value");
-            HT_MQTT_Publish(&mqttClient, (char *)topic, mqtt_payload, strlen((char *)mqtt_payload), QOS0, 0, 0, 0);
 
+            while(!mqttClient.isconnected){
+                if(HT_FSM_MQTTConnect() == HT_NOT_CONNECTED) {
+                    printf("\n MQTT Connection Error!\n");
+                }
+            }
+
+            ret = HT_MQTT_Publish(&mqttClient, (char *)topic, mqtt_payload, strlen((char *)mqtt_payload), QOS0, 0, 0, 0);
+
+            printf("Retorno mqtt publish %d\n", ret);
             printf("Valor recebido do LDR: %s mV\n", payload);
         }
         osDelay(100);
     }
     
 }
+static void HT_BtnThread(void *arg){
+    uint32_t recv;
+
+    int count_1 = 0;
+    int count_2 = 0;
+
+    char payload[12];
+
+    printf("Task do btn Iniciada \n");
+    while (1)
+    {
+        if(osMessageQueueGet(btnQueue, &recv, NULL, osWaitForever) == osOK) {
+            if(recv == 1) {
+                
+                GPIO_RestoreIRQMask(BLUE_BUTTON_INSTANCE, blue_irqn_mask);
+                count_1 = count_1 + 1;
+
+                printf("btn 1 pressionado %d\n", count_1);
+                memset(payload, 0, sizeof(payload));
+                snprintf(payload, sizeof(payload), "%lu", count_1);
+                HT_FSM_MQTTWritePayload((uint8_t *)payload, strlen(payload));
+                memset(topic, 0, sizeof(topic));
+                sprintf(topic, "hana/pantoja/htnb32l_button_1");
+
+                while(!mqttClient.isconnected){
+                    if(HT_FSM_MQTTConnect() == HT_NOT_CONNECTED) {
+                        printf("\n MQTT Connection Error!\n");
+                    }
+                }
+
+                HT_MQTT_Publish(&mqttClient, (char *)topic, mqtt_payload, strlen((char *)mqtt_payload), QOS0, 0, 0, 0);
+
+
+            } else if (recv == 2) {
+                GPIO_RestoreIRQMask(WHITE_BUTTON_INSTANCE, white_irqn_mask);
+                count_2 = count_2 + 1;
+                printf("btn 2 pressionado %d\n", count_2);
+
+                memset(payload, 0, sizeof(payload));
+                snprintf(payload, sizeof(payload), "%lu", count_2);
+                HT_FSM_MQTTWritePayload((uint8_t *)payload, strlen(payload));
+                memset(topic, 0, sizeof(topic));
+                sprintf(topic, "hana/pantoja/htnb32l_button_2");
+
+                while(!mqttClient.isconnected){
+                    if(HT_FSM_MQTTConnect() == HT_NOT_CONNECTED) {
+                        printf("\n MQTT Connection Error!\n");
+                    }
+                }
+
+                HT_MQTT_Publish(&mqttClient, (char *)topic, mqtt_payload, strlen((char *)mqtt_payload), QOS0, 0, 0, 0);
+
+
+            }
+            
+            white_irqn_mask = 0;
+            blue_irqn_mask = 0;
+        }
+       
+        osDelay(1000);
+    }
+}
+
+static void HT_Btn_Thread_Start(void *arg) {
+    osThreadAttr_t task_attr;
+
+    memset(&task_attr,0,sizeof(task_attr));
+    memset(btntaskStack, 0xA5,LED_TASK_STACK_SIZE);
+    task_attr.name = "btn_thread";
+    task_attr.stack_mem = btntaskStack;
+    task_attr.stack_size = LED_TASK_STACK_SIZE;
+    task_attr.priority = osPriorityNormal;
+    task_attr.cb_mem = &btn_thread;
+    task_attr.cb_size = sizeof(StaticTask_t);
+
+    osThreadNew(HT_BtnThread, NULL, &task_attr);
+}
+
 
 static void HT_Yield_Thread(void *arg) {
     osThreadAttr_t task_attr;
@@ -249,6 +340,9 @@ void HT_Fsm(void) {
 
     //Ldr Task
     HT_LDR_Task(NULL);
+
+    //Btn Task()
+    HT_Btn_Thread_Start(NULL);
 
     printf("Executing fsm...\n");
 

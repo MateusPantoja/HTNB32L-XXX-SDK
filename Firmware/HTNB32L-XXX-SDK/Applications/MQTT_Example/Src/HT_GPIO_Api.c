@@ -19,11 +19,13 @@
 #include <stdio.h>
 #include "string.h"
 
+osMessageQueueId_t btnQueue;
 extern volatile HT_Button button_color;
 volatile uint8_t button_irqn = 0;
 
 uint16_t blue_irqn_mask;
 uint16_t white_irqn_mask;
+volatile btn = 0;
 
 /* Function prototypes  ------------------------------------------------------------------*/
 
@@ -42,21 +44,24 @@ static void HT_GPIO_IRQnCallback(void);
 
 static void HT_GPIO_IRQnCallback(void) {
 
-    button_irqn = 1;
+    //button_irqn = 1;
 
     if (GPIO_GetInterruptFlags(BLUE_BUTTON_INSTANCE) & BLUE_BUTTON_MASK) {
-        button_color = HT_BLUE_BUTTON;
+       // button_color = HT_BLUE_BUTTON;
         blue_irqn_mask = GPIO_SaveAndSetIRQMask(BLUE_BUTTON_INSTANCE);
-
+        btn = 1;
         GPIO_ClearInterruptFlags(BLUE_BUTTON_INSTANCE, BLUE_BUTTON_MASK);
     
     } else if(GPIO_GetInterruptFlags(WHITE_BUTTON_INSTANCE) & WHITE_BUTTON_MASK) {
 
-        button_color = HT_WHITE_BUTTON;
+       // button_color = HT_WHITE_BUTTON;
         white_irqn_mask = GPIO_SaveAndSetIRQMask(WHITE_BUTTON_INSTANCE);
-
+        btn=2;
         GPIO_ClearInterruptFlags(WHITE_BUTTON_INSTANCE, WHITE_BUTTON_MASK);
     }
+    
+    osMessageQueuePut(btnQueue, &btn, 0, 0);
+
 }
 
 void HT_GPIO_WritePin(uint16_t pin, uint32_t instance, uint16_t value) {
@@ -65,6 +70,8 @@ void HT_GPIO_WritePin(uint16_t pin, uint32_t instance, uint16_t value) {
 }
 
 void HT_GPIO_ButtonInit(void) {
+    btnQueue = osMessageQueueNew(10, sizeof(uint32_t), NULL);
+
     pad_config_t padConfig;
     gpio_pin_config_t config;
 
@@ -81,7 +88,8 @@ void HT_GPIO_ButtonInit(void) {
     PAD_SetPinPullConfig(WHITE_BUTTON_PAD_ID, PAD_InternalPullUp);
 
     config.pinDirection = GPIO_DirectionInput;
-    config.misc.interruptConfig = GPIO_InterruptFallingEdge;
+    config.misc.interruptConfig = GPIO_InterruptFallingEdge;  /**< Falling edge interrupt */
+;
 
     GPIO_PinConfig(BLUE_BUTTON_INSTANCE, BLUE_BUTTON_PIN, &config);
     GPIO_PinConfig(WHITE_BUTTON_INSTANCE, WHITE_BUTTON_PIN, &config);
